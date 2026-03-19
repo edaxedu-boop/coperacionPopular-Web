@@ -1537,9 +1537,9 @@ export default function App() {
                 key={doc.id}
                 className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-[400px] flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl transition-all hover:shadow-2xl"
               >
-                {/* PDF Preview - mobile friendly */}
+                {/* PDF Preview - direct link, works natively on all mobile browsers */}
                 <a
-                  href={`https://docs.google.com/viewer?url=${encodeURIComponent(getAbsoluteUrl(doc.pdfUrl))}&embedded=true`}
+                  href={getAbsoluteUrl(doc.pdfUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-[#003A75] to-[#006BB6] group"
@@ -1563,9 +1563,9 @@ export default function App() {
                   <p className="mt-4 text-sm text-slate-600 line-clamp-3 flex-grow">{doc.desc}</p>
                   
                   <div className="mt-8 flex flex-col gap-3">
-                    {/* Ver en Google Docs Viewer - funciona en móvil */}
+                    {/* Abrir PDF directamente — Chrome/Safari en móvil lo abren sin login */}
                     <a 
-                      href={`https://docs.google.com/viewer?url=${encodeURIComponent(getAbsoluteUrl(doc.pdfUrl))}`}
+                      href={getAbsoluteUrl(doc.pdfUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#006BB6] py-3 text-sm font-bold text-white transition-all hover:bg-[#005a9c] shadow-lg"
