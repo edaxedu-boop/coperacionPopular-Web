@@ -115,6 +115,22 @@ app.post('/api/login', (req, res) => {
   }
 });
 
+app.post('/api/change-password', authenticate, (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
+  }
+
+  try {
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.userId);
+    res.json({ success: true, message: 'Contraseña actualizada correctamente' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Error al cambiar la contraseña' });
+  }
+});
+
 // File Upload Route with Compression
 app.post('/api/upload', authenticate, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });

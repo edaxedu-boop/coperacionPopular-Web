@@ -151,7 +151,8 @@ export default function App() {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
-  const [activeSection, setActiveSection] = useState<'news' | 'docs' | 'gallery' | null>('news');
+  const [activeSection, setActiveSection] = useState<'news' | 'docs' | 'gallery' | 'security' | null>('news');
+  const [newPassword, setNewPassword] = useState('');
 
   // Hero Carousel Auto-play
   useEffect(() => {
@@ -336,6 +337,32 @@ export default function App() {
     } catch (err) {
       console.error(err);
       alert('Error de conexión en galería');
+    }
+  };
+  const changePassword = async () => {
+    if (newPassword.length < 4) {
+      alert('La contraseña debe tener al menos 4 caracteres');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/change-password`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Contraseña actualizada con éxito');
+        setNewPassword('');
+        setActiveSection(null);
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (err) {
+      alert('Error de conexión');
     }
   };
 
@@ -564,6 +591,51 @@ export default function App() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Security Management */}
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+            <button 
+              onClick={() => setActiveSection(activeSection === 'security' ? null : 'security')}
+              className="w-full flex items-center justify-between p-8 bg-white hover:bg-slate-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Lock className="h-8 w-8 text-[#006BB6]" />
+                <h3 className="text-2xl font-black text-slate-900">Seguridad y Acceso</h3>
+              </div>
+              <ChevronDown className={`h-6 w-6 transition-transform ${activeSection === 'security' ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {activeSection === 'security' && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-8 pb-8"
+                >
+                  <div className="rounded-2xl bg-slate-50 p-6">
+                    <label className="block text-sm font-bold text-slate-700">Nueva Contraseña</label>
+                    <div className="mt-2 flex gap-4">
+                      <input 
+                        type="password" 
+                        className="flex-1 rounded-xl border border-slate-200 px-4 py-2"
+                        placeholder="Escribe la nueva contraseña"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button 
+                        onClick={changePassword}
+                        className="rounded-xl bg-[#006BB6] px-8 py-2 font-bold text-white transition-opacity hover:opacity-90"
+                      >
+                        Actualizar
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500">Mínimo 4 caracteres. Se recomienda usar una combinación de letras y números.</p>
                   </div>
                 </motion.div>
               )}
