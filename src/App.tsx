@@ -1275,22 +1275,17 @@ export default function App() {
                   key={doc.id || idx}
                   className={`${arr.length === 1 ? 'w-full max-w-[1000px] flex flex-col md:flex-row' : 'w-full md:w-[calc(50%-1rem)] max-w-[400px] flex flex-col'} overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl transition-all hover:shadow-2xl`}
                 >
-                    {/* PDF Visualizer */}
-                    <div className={`${arr.length === 1 ? 'w-full md:w-1/2 h-[280px] md:h-[500px]' : 'w-full h-[180px] md:h-[300px]'} relative bg-slate-100 group/pdf`}>
-                      <iframe 
-                        src={getAbsoluteUrl(doc.pdfUrl) + "#view=FitH&toolbar=0&navpanes=0&scrollbar=1"} 
-                        className="h-full w-full border-none"
-                        title={doc.title}
-                      ></iframe>
-                      {/* Fullscreen Overlay Button */}
-                      <a 
+                    {/* PDF Thumbnail - PDF.js renders first page automatically */}
+                    <div className={`${arr.length === 1 ? 'w-full md:w-1/2 h-[280px] md:h-[400px]' : 'w-full h-[200px] md:h-[260px]'} relative bg-slate-100 group/pdf overflow-hidden`}>
+                      <PdfThumbnail url={getAbsoluteUrl(doc.pdfUrl)} />
+                      <a
                         href={getAbsoluteUrl(doc.pdfUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover/pdf:opacity-100"
-                        title="Ver pantalla completa"
+                        className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover/pdf:opacity-100"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <Maximize className="h-5 w-5" />
+                        <span className="rounded-full bg-white px-5 py-2 text-xs font-bold text-[#006BB6] shadow-lg">Ver PDF →</span>
                       </a>
                     </div>
 
