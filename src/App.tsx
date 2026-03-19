@@ -92,6 +92,7 @@ const Layout = ({ children, isAdminLoggedIn, handleLogout, isMenuOpen, setIsMenu
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<string | null>('reglamento');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
   const [news, setNews] = useState<any[]>([]);
@@ -1228,9 +1229,10 @@ export default function App() {
               {gallery.slice(currentGalleryIndex, currentGalleryIndex + 2).map((item, idx, arr) => (
                 <div 
                   key={item.id || idx}
-                  className={`group relative ${arr.length === 1 ? 'aspect-[21/9] w-full max-w-[1000px]' : 'aspect-square w-full md:w-[calc(50%-1rem)] max-w-[450px]'} overflow-hidden rounded-3xl shadow-2xl`}
+                  className={`group relative ${arr.length === 1 ? 'w-full max-w-[1000px]' : 'w-full md:w-[calc(50%-1rem)] max-w-[450px]'} overflow-hidden rounded-3xl bg-white shadow-2xl h-fit cursor-zoom-in`}
+                  onClick={() => setSelectedImage(getAbsoluteUrl(item.img))}
                 >
-                    <img src={getAbsoluteUrl(item.img)} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
+                    <img src={getAbsoluteUrl(item.img)} className="h-auto w-full transition-transform duration-500 group-hover:scale-105" alt="" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 transition-opacity">
                       <div className="absolute bottom-0 p-6 md:p-12">
                         <p className={`${arr.length === 1 ? 'text-3xl md:text-6xl' : 'text-xl md:text-3xl'} font-black text-white`}>{item.title}</p>
@@ -1409,29 +1411,30 @@ export default function App() {
           <p className="mt-4 text-lg text-slate-600 md:text-xl">Imágenes de nuestras actividades y encuentros con la comunidad</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {gallery.map((item, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
-              whileHover={{ y: -10 }}
-              className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200 shadow-md"
-            >
-              <img
-                src={getAbsoluteUrl(item.img)}
-                alt={item.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#FFD100]">{item.desc}</span>
-                <h3 className="text-xl font-bold text-white">{item.title}</h3>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <div className="columns-1 gap-6 sm:columns-2 lg:columns-3 space-y-6">
+            {gallery.map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05 }}
+                whileHover={{ y: -10 }}
+                className="group relative break-inside-avoid overflow-hidden rounded-3xl bg-white shadow-xl mb-6 cursor-zoom-in"
+                onClick={() => setSelectedImage(getAbsoluteUrl(item.img))}
+              >
+                <img
+                  src={getAbsoluteUrl(item.img)}
+                  alt={item.title}
+                  className="h-auto w-full transition-transform duration-500 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#FFD100]">{item.desc}</span>
+                  <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
       </div>
     </section>
   );
@@ -1500,6 +1503,38 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md cursor-zoom-out"
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative max-h-[90vh] max-w-[95vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setSelectedImage(null)}
+                className="absolute -top-12 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <img 
+                src={selectedImage} 
+                alt="Full preview" 
+                className="max-h-[90vh] rounded-2xl object-contain shadow-2xl border border-white/10"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <Routes>
         <Route path="/" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderHome()}</Layout>} />
         <Route path="/about" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderAbout()}</Layout>} />
