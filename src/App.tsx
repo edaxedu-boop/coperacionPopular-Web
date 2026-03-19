@@ -1,4 +1,4 @@
-import { ChevronDown, Menu, X, Lock, LogOut, Plus, Trash2, Edit, Save, FileText, Image as ImageIcon, Newspaper, Maximize, AlertCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X, Lock, LogOut, Plus, Trash2, Edit, Save, FileText, Image as ImageIcon, Newspaper, Maximize, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
