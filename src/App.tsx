@@ -1533,49 +1533,58 @@ export default function App() {
 
           <div className="flex flex-wrap justify-center gap-6 md:gap-8">
             {documents.map((doc) => (
-              <div 
+              <div
                 key={doc.id}
                 className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-[400px] flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl transition-all hover:shadow-2xl"
               >
-                  {/* PDF Visualizer */}
-                  <div className="relative h-[250px] md:h-[350px] bg-slate-100 group/pdf">
-                    <iframe 
-                      src={getAbsoluteUrl(doc.pdfUrl) + "#view=FitH&toolbar=0&navpanes=0&scrollbar=0"} 
-                      className="h-full w-full border-none pointer-events-none"
-                      title={doc.title}
-                    ></iframe>
-                    {/* Fullscreen Overlay Button */}
+                {/* PDF Preview - mobile friendly */}
+                <a
+                  href={`https://docs.google.com/viewer?url=${encodeURIComponent(getAbsoluteUrl(doc.pdfUrl))}&embedded=true`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-[#003A75] to-[#006BB6] group"
+                >
+                  <div className="flex flex-col items-center gap-3 text-white">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 shadow-inner">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-widest text-white/70">PDF</span>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#006BB6]">Ver documento →</span>
+                  </div>
+                </a>
+
+                <div className="p-8 flex flex-col flex-grow">
+                  <span className="text-xs font-bold text-red-500 uppercase">{doc.version || '1.0'}</span>
+                  <h3 className="mt-3 text-xl font-black text-slate-900 line-clamp-2">
+                    {doc.title}
+                  </h3>
+                  <p className="mt-4 text-sm text-slate-600 line-clamp-3 flex-grow">{doc.desc}</p>
+                  
+                  <div className="mt-8 flex flex-col gap-3">
+                    {/* Ver en Google Docs Viewer - funciona en móvil */}
                     <a 
-                      href={getAbsoluteUrl(doc.pdfUrl)}
+                      href={`https://docs.google.com/viewer?url=${encodeURIComponent(getAbsoluteUrl(doc.pdfUrl))}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover/pdf:opacity-100"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#006BB6] py-3 text-sm font-bold text-white transition-all hover:bg-[#005a9c] shadow-lg"
                     >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#006BB6] shadow-xl">
-                        <Maximize className="h-6 w-6" />
-                      </div>
+                      <FileText className="h-4 w-4" /> Ver PDF
+                    </a>
+                    {/* Descarga directa */}
+                    <a 
+                      href={getAbsoluteUrl(doc.pdfUrl)}
+                      download
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50"
+                    >
+                      <ChevronDown className="h-4 w-4 -rotate-90" /> Descargar
                     </a>
                   </div>
-
-                  <div className="p-8 flex flex-col flex-grow">
-                    <span className="text-xs font-bold text-red-500 uppercase">{doc.version || '1.0'}</span>
-                    <h3 className="mt-3 text-xl font-black text-slate-900 line-clamp-2">
-                      {doc.title}
-                    </h3>
-                    <p className="mt-4 text-sm text-slate-600 line-clamp-3 flex-grow">{doc.desc}</p>
-                    
-                    <div className="mt-8">
-                      <a 
-                        href={getAbsoluteUrl(doc.pdfUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#006BB6] py-3 text-sm font-bold text-white transition-all hover:bg-[#005a9c] shadow-lg"
-                      >
-                        Descargar PDF <ChevronDown className="h-4 w-4 -rotate-90" />
-                      </a>
-                    </div>
-                  </div>
+                </div>
               </div>
+
             ))}
           </div>
         </div>
