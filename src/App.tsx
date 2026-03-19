@@ -5,6 +5,90 @@ import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate 
 
 type Page = 'home' | 'about' | 'news' | 'gallery' | 'documents' | 'admin';
 
+const NotFound = () => (
+  <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
+    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="mb-8 rounded-full bg-slate-100 p-8 text-slate-400">
+      <AlertCircle className="h-20 w-20" />
+    </motion.div>
+    <h1 className="text-8xl font-black tracking-tighter text-[#006BB6]">404</h1>
+    <h2 className="mt-4 text-3xl font-bold text-slate-800">Página no encontrada</h2>
+    <p className="mt-6 max-w-md text-slate-500">Lo sentimos, la página que buscas no existe.</p>
+    <Link to="/" className="mt-10 rounded-full bg-[#006BB6] px-10 py-4 font-bold text-white shadow-xl hover:bg-[#005a99]">
+      Regresar al Inicio
+    </Link>
+  </div>
+);
+
+interface LayoutProps {
+  children: React.ReactNode;
+  isAdminLoggedIn: boolean;
+  handleLogout: () => void;
+  isMenuOpen: boolean;
+  setIsMenuOpen: (open: boolean) => void;
+  navLinks: { name: string; path: string; hasDropdown?: boolean }[];
+}
+
+const Layout = ({ children, isAdminLoggedIn, handleLogout, isMenuOpen, setIsMenuOpen, navLinks }: LayoutProps) => {
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen bg-white font-['Outfit',sans-serif]">
+      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-20 items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-10 w-10 overflow-hidden"><img src="/assets/logo.png" alt="Logo" className="h-full w-full object-contain" /></div>
+              <div className="flex flex-col leading-none">
+                <span className="text-xl font-black tracking-tighter text-[#006BB6]">COOPERACIÓN</span>
+                <span className="text-xl font-black tracking-tighter text-[#006BB6]">POPULAR</span>
+              </div>
+            </Link>
+            <nav className="hidden items-center gap-1 md:flex">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`relative rounded-full px-5 py-2 text-sm font-bold transition-all ${location.pathname === link.path ? 'text-[#006BB6]' : 'text-slate-600 hover:text-[#006BB6]'}`}
+                >
+                  {link.name}
+                  {location.pathname === link.path && (
+                    <motion.div layoutId="navUnderline" className="absolute bottom-0 left-5 right-5 h-0.5 bg-[#006BB6]" />
+                  )}
+                </Link>
+              ))}
+              {isAdminLoggedIn && (
+                <button onClick={handleLogout} className="ml-4 flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-100">
+                  <LogOut className="h-4 w-4" /> Salir
+                </button>
+              )}
+            </nav>
+            <button className="md:hidden text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.nav initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0 }} className="border-t border-slate-100 bg-white md:hidden p-4">
+              <div className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                  <Link key={link.path} to={link.path} onClick={() => setIsMenuOpen(false)} className={`block p-4 font-bold rounded-lg ${location.pathname === link.path ? 'bg-slate-50 text-[#006BB6]' : 'text-slate-600 hover:bg-slate-50'}`}>{link.name}</Link>
+                ))}
+              </div>
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+      <main>{children}</main>
+      <footer className="border-t border-slate-200 bg-[#F8F8F8] pt-16 pb-12">
+         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+           © 2024 Cooperación Popular. Todos los derechos reservados.
+         </div>
+      </footer>
+    </div>
+  );
+};
+
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<string | null>('reglamento');
@@ -1323,97 +1407,16 @@ export default function App() {
     );
   };
 
-  const NotFound = () => (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
-      <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="mb-8 rounded-full bg-slate-100 p-8 text-slate-400">
-        <AlertCircle className="h-20 w-20" />
-      </motion.div>
-      <h1 className="text-8xl font-black tracking-tighter text-[#006BB6]">404</h1>
-      <h2 className="mt-4 text-3xl font-bold text-slate-800">Página no encontrada</h2>
-      <p className="mt-6 max-w-md text-slate-500">Lo sentimos, la página que buscas no existe.</p>
-      <Link to="/" className="mt-10 rounded-full bg-[#006BB6] px-10 py-4 font-bold text-white shadow-xl hover:bg-[#005a99]">
-        Regresar al Inicio
-      </Link>
-    </div>
-  );
-
-  const Layout = ({ children }: { children: React.ReactNode }) => {
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    return (
-      <div className="min-h-screen bg-white font-['Outfit',sans-serif]">
-        <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between">
-              <Link to="/" className="flex items-center gap-3">
-                <div className="h-10 w-10 overflow-hidden"><img src="/assets/logo.png" alt="Logo" className="h-full w-full object-contain" /></div>
-                <div className="flex flex-col leading-none">
-                  <span className="text-xl font-black tracking-tighter text-[#006BB6]">COOPERACIÓN</span>
-                  <span className="text-xl font-black tracking-tighter text-[#006BB6]">POPULAR</span>
-                </div>
-              </Link>
-              <nav className="hidden items-center gap-1 md:flex">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`relative rounded-full px-5 py-2 text-sm font-bold transition-all ${location.pathname === link.path ? 'text-[#006BB6]' : 'text-slate-600 hover:text-[#006BB6]'}`}
-                  >
-                    {link.name}
-                    {location.pathname === link.path && (
-                      <motion.div layoutId="navUnderline" className="absolute bottom-0 left-5 right-5 h-0.5 bg-[#006BB6]" />
-                    )}
-                  </Link>
-                ))}
-                {isAdminLoggedIn && (
-                  <button onClick={handleLogout} className="ml-4 flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-100">
-                    <LogOut className="h-4 w-4" /> Salir
-                  </button>
-                )}
-              </nav>
-              <button className="md:hidden text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </div>
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.nav initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0 }} className="border-t border-slate-100 bg-white md:hidden p-4">
-                <div className="flex flex-col gap-2">
-                  {navLinks.map((link) => (
-                    <Link key={link.path} to={link.path} onClick={() => setIsMenuOpen(false)} className={`block p-4 font-bold rounded-lg ${location.pathname === link.path ? 'bg-slate-50 text-[#006BB6]' : 'text-slate-600 hover:bg-slate-50'}`}>{link.name}</Link>
-                  ))}
-                </div>
-              </motion.nav>
-            )}
-          </AnimatePresence>
-        </header>
-        <main>{children}</main>
-        <footer className="border-t border-slate-200 bg-[#F8F8F8] pt-16 pb-12">
-           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
-             © 2024 Cooperación Popular. Todos los derechos reservados.
-           </div>
-        </footer>
-      </div>
-    );
-  };
-
-  const AdminRoute = () => {
-    if (!isAdminLoggedIn) return <Layout>{renderLogin()}</Layout>;
-    return <Layout>{renderAdmin()}</Layout>;
-  };
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout>{renderHome()}</Layout>} />
-        <Route path="/about" element={<Layout>{renderAbout()}</Layout>} />
-        <Route path="/news" element={<Layout>{renderNews()}</Layout>} />
-        <Route path="/gallery" element={<Layout>{renderGallery()}</Layout>} />
-        <Route path="/documents" element={<Layout>{renderDocuments()}</Layout>} />
-        <Route path="/admin" element={<AdminRoute />} />
-        <Route path="*" element={<Layout><NotFound /></Layout>} />
+        <Route path="/" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderHome()}</Layout>} />
+        <Route path="/about" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderAbout()}</Layout>} />
+        <Route path="/news" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderNews()}</Layout>} />
+        <Route path="/gallery" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderGallery()}</Layout>} />
+        <Route path="/documents" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderDocuments()}</Layout>} />
+        <Route path="/admin" element={!isAdminLoggedIn ? <Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderLogin()}</Layout> : <Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}>{renderAdmin()}</Layout>} />
+        <Route path="*" element={<Layout isAdminLoggedIn={isAdminLoggedIn} handleLogout={handleLogout} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} navLinks={navLinks}><NotFound /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
