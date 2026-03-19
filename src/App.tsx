@@ -29,7 +29,7 @@ const PdfThumbnail = ({ url }: { url: string }) => {
         const viewport = page.getViewport({ scale: 1.2 });
         canvas.width = viewport.width;
         canvas.height = viewport.height;
-        await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({ canvasContext: context, viewport, canvas }).promise;
         if (!cancelled) setLoading(false);
       } catch {
         if (!cancelled) setError(true);
