@@ -1,7 +1,70 @@
 import { ChevronDown, ChevronRight, Menu, X, Lock, LogOut, Plus, Trash2, Edit, Save, FileText, Image as ImageIcon, Newspaper, Maximize, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+
+// PDF Thumbnail component - renders first page as image using PDF.js (works on all devices)
+const PdfThumbnail = ({ url }: { url: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    const render = async () => {
+      try {
+        const pdf = await pdfjsLib.getDocument({ url, withCredentials: false }).promise;
+        if (cancelled) return;
+        const page = await pdf.getPage(1);
+        if (cancelled) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        const viewport = page.getViewport({ scale: 1.2 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: context, viewport }).promise;
+        if (!cancelled) setLoading(false);
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    };
+    render();
+    return () => { cancelled = true; };
+  }, [url]);
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#003A75] to-[#006BB6]">
+        <FileText className="h-10 w-10 text-white/60" />
+        <span className="mt-2 text-xs text-white/50">PDF</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-slate-100">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#006BB6] border-t-transparent" />
+            <span className="text-xs text-slate-400">Cargando vista previa...</span>
+          </div>
+        </div>
+      )}
+      <canvas
+        ref={canvasRef}
+        className={`h-auto w-full transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}
+      />
+    </div>
+  );
+};
 
 type Page = 'home' | 'about' | 'news' | 'gallery' | 'documents' | 'admin';
 
@@ -1537,23 +1600,18 @@ export default function App() {
                 key={doc.id}
                 className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-[400px] flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl transition-all hover:shadow-2xl"
               >
-                {/* PDF Preview - direct link, works natively on all mobile browsers */}
-                <a
-                  href={getAbsoluteUrl(doc.pdfUrl)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relative flex h-[180px] items-center justify-center bg-gradient-to-br from-[#003A75] to-[#006BB6] group"
-                >
-                  <div className="flex flex-col items-center gap-3 text-white">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 shadow-inner">
-                      <FileText className="h-8 w-8 text-white" />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-white/70">PDF</span>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
-                    <span className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#006BB6]">Ver documento →</span>
-                  </div>
-                </a>
+                {/* PDF Thumbnail - renders first page using PDF.js */}
+                <div className="relative h-[220px] overflow-hidden bg-slate-100 group">
+                  <PdfThumbnail url={getAbsoluteUrl(doc.pdfUrl)} />
+                  <a
+                    href={getAbsoluteUrl(doc.pdfUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <span className="rounded-full bg-white px-5 py-2 text-xs font-bold text-[#006BB6] shadow-lg">Ver PDF →</span>
+                  </a>
+                </div>
 
                 <div className="p-8 flex flex-col flex-grow">
                   <span className="text-xs font-bold text-red-500 uppercase">{doc.version || '1.0'}</span>
