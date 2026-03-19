@@ -158,9 +158,7 @@ app.post('/api/upload', authenticate, upload.single('file'), async (req, res) =>
       finalPath = compressedPath;
     }
 
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const url = `${protocol}://${host}/uploads/${isPDF ? 'documents' : 'images'}/${finalFilename}`;
+    const url = `/uploads/${isPDF ? 'documents' : 'images'}/${finalFilename}`;
     res.json({ url });
   } catch (err) {
     console.error('Upload processing error:', err);

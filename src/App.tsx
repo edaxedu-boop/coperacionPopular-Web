@@ -142,9 +142,28 @@ export default function App() {
 
   const getAbsoluteUrl = (url: string) => {
     if (!url) return '';
-    if (url.includes('localhost:5000') && !API_URL.includes('localhost')) {
-      return url.replace(/https?:\/\/localhost:5000/, new URL(API_URL).origin);
+    
+    // If it's already a full external URL, return it
+    if (url.startsWith('http')) {
+      if (url.includes('localhost:5000') && !API_URL.includes('localhost')) {
+        return url.replace(/https?:\/\/localhost:5000/, new URL(API_URL).origin);
+      }
+      return url;
     }
+
+    // If it's a relative path starting with /uploads, prepend origin
+    const origin = new URL(API_URL).origin;
+    if (url.startsWith('/uploads')) {
+      return `${origin}${url}`;
+    }
+
+    // If it's just a filename, assume it's a document/image based on extension
+    // (This is a fallback for legacy or manually entered data)
+    if (!url.startsWith('/')) {
+      const isPDF = url.toLowerCase().endsWith('.pdf');
+      return `${origin}/uploads/${isPDF ? 'documents' : 'images'}/${url}`;
+    }
+
     return url;
   };
 
@@ -564,7 +583,7 @@ export default function App() {
                     {news.map((item) => (
                       <div key={item.id} className="flex items-center justify-between rounded-2xl border border-slate-100 p-4 hover:bg-slate-50">
                         <div className="flex items-center gap-4">
-                          <img src={item.img} className="h-12 w-12 rounded-lg object-cover" />
+                          <img src={getAbsoluteUrl(item.img)} className="h-12 w-12 rounded-lg object-cover" />
                           <div>
                             <h4 className="font-bold text-slate-900">{item.title}</h4>
                             <p className="text-xs text-slate-500">{item.date} • {item.tag}</p>
@@ -874,7 +893,7 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                     {gallery.map((item) => (
                       <div key={item.id} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-100">
-                        <img src={item.img} className="h-full w-full object-cover" />
+                        <img src={getAbsoluteUrl(item.img)} className="h-full w-full object-cover" />
                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                           <button 
                             onClick={() => {
@@ -1032,7 +1051,7 @@ export default function App() {
                     }}
                   >
                     <div className={`${arr.length === 1 ? 'aspect-[21/9]' : 'aspect-[16/7]'} w-full overflow-hidden bg-slate-100`}>
-                      <img src={item.img} className="h-full w-full object-cover transition-transform hover:scale-105" alt="" referrerPolicy="no-referrer" />
+                      <img src={getAbsoluteUrl(item.img)} className="h-full w-full object-cover transition-transform hover:scale-105" alt="" referrerPolicy="no-referrer" />
                     </div>
                     <div className="p-6 md:p-10">
                       <span className="mb-2 inline-block text-xs font-bold uppercase tracking-widest text-[#006BB6] md:text-base">
@@ -1211,7 +1230,7 @@ export default function App() {
                   key={item.id || idx}
                   className={`group relative ${arr.length === 1 ? 'aspect-[21/9] w-full max-w-[1000px]' : 'aspect-square w-full md:w-[calc(50%-1rem)] max-w-[450px]'} overflow-hidden rounded-3xl shadow-2xl`}
                 >
-                    <img src={item.img} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
+                    <img src={getAbsoluteUrl(item.img)} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 transition-opacity">
                       <div className="absolute bottom-0 p-6 md:p-12">
                         <p className={`${arr.length === 1 ? 'text-3xl md:text-6xl' : 'text-xl md:text-3xl'} font-black text-white`}>{item.title}</p>
@@ -1270,7 +1289,7 @@ export default function App() {
               
               <div className="my-10 aspect-video overflow-hidden rounded-3xl shadow-2xl">
                 <img 
-                  src={selectedArticle.img} 
+                  src={getAbsoluteUrl(selectedArticle.img)} 
                   alt={selectedArticle.title} 
                   className="h-full w-full object-cover"
                   referrerPolicy="no-referrer"
@@ -1308,7 +1327,7 @@ export default function App() {
               >
                 <div className="h-64 overflow-hidden">
                   <img 
-                    src={item.img} 
+                    src={getAbsoluteUrl(item.img)} 
                     alt={item.title} 
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     referrerPolicy="no-referrer"
@@ -1401,7 +1420,7 @@ export default function App() {
               className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200 shadow-md"
             >
               <img
-                src={item.img}
+                src={getAbsoluteUrl(item.img)}
                 alt={item.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 referrerPolicy="no-referrer"
