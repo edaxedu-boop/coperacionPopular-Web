@@ -1,17 +1,12 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { ChevronDown, Menu, X, Lock, LogOut, Plus, Trash2, Edit, Save, FileText, Image as ImageIcon, Newspaper, Maximize } from 'lucide-react';
+import { ChevronDown, Menu, X, Lock, LogOut, Plus, Trash2, Edit, Save, FileText, Image as ImageIcon, Newspaper, Maximize, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 
 type Page = 'home' | 'about' | 'news' | 'gallery' | 'documents' | 'admin';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedDoc, setSelectedDoc] = useState<string | null>('reglamento');
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
@@ -53,12 +48,12 @@ export default function App() {
   };
 
   const navLinks = [
-    { name: 'Inicio', id: 'home' as Page },
-    { name: 'Nosotros', id: 'about' as Page },
-    { name: 'Noticias', id: 'news' as Page },
-    { name: 'Galería', id: 'gallery' as Page },
-    { name: 'Documentos', id: 'documents' as Page, hasDropdown: true },
-    ...(isAdminLoggedIn ? [{ name: 'Panel Admin', id: 'admin' as Page }] : []),
+    { name: 'Inicio', path: '/' },
+    { name: 'Nosotros', path: '/about' },
+    { name: 'Noticias', path: '/news' },
+    { name: 'Galería', path: '/gallery' },
+    { name: 'Documentos', path: '/documents', hasDropdown: true },
+    ...(isAdminLoggedIn ? [{ name: 'Panel Admin', path: '/admin' }] : []),
   ];
 
   const getAbsoluteUrl = (url: string) => {
@@ -82,11 +77,6 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Autoscroll Effect - Disabled as requested
-  useEffect(() => {
-    // Manual navigation only
-  }, [currentPage, news.length, documents.length, gallery.length]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -98,11 +88,10 @@ export default function App() {
       const data = await response.json();
       if (data.success) {
         setIsAdminLoggedIn(true);
-        setShowLogin(false);
         setToken(data.token);
         localStorage.setItem('adminToken', data.token);
-        setCurrentPage('admin');
-        setLoginError('');
+        setShowLogin(false);
+        setLoginForm({ user: '', password: '' });
       } else {
         setLoginError(data.error);
       }
@@ -115,7 +104,6 @@ export default function App() {
     setIsAdminLoggedIn(false);
     setToken(null);
     localStorage.removeItem('adminToken');
-    setCurrentPage('home');
   };
 
   const deleteNews = async (id: number) => {
@@ -268,11 +256,11 @@ export default function App() {
   };
 
   const renderLogin = () => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+    <div className="flex w-full items-center justify-center py-12">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl border border-slate-100"
       >
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-[#006BB6]">
@@ -306,15 +294,8 @@ export default function App() {
           {loginError && <p className="text-sm font-bold text-red-500">{loginError}</p>}
           <div className="flex gap-4 pt-4">
             <button 
-              type="button"
-              onClick={() => setShowLogin(false)}
-              className="flex-1 rounded-xl border border-slate-200 py-3 font-bold text-slate-600 hover:bg-slate-50"
-            >
-              Cancelar
-            </button>
-            <button 
               type="submit"
-              className="flex-1 rounded-xl bg-[#006BB6] py-3 font-bold text-white shadow-lg shadow-blue-200 transition-transform hover:scale-105 active:scale-95"
+              className="w-full rounded-xl bg-[#006BB6] py-3 font-bold text-white shadow-lg shadow-blue-200 transition-transform hover:scale-105 active:scale-95"
             >
               Entrar
             </button>
@@ -874,12 +855,12 @@ export default function App() {
                   ></button>
                 ))}
               </div>
-              <button 
-                onClick={() => setCurrentPage('news')}
+              <Link 
+                to="/news"
                 className="font-bold text-[#006BB6] hover:underline"
               >
                 Ver todas →
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -891,7 +872,7 @@ export default function App() {
                   className={`${arr.length === 1 ? 'w-full max-w-[800px]' : 'w-full md:w-[calc(50%-1rem)] max-w-[450px]'} cursor-pointer overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all hover:shadow-2xl`}
                   onClick={() => {
                       setSelectedArticle(item);
-                      setCurrentPage('news');
+                      window.location.href = '/news';
                     }}
                   >
                     <div className={`${arr.length === 1 ? 'aspect-[21/9]' : 'aspect-[16/7]'} w-full overflow-hidden bg-slate-100`}>
@@ -958,12 +939,12 @@ export default function App() {
                   ></button>
                 ))}
               </div>
-              <button 
-                onClick={() => setCurrentPage('documents')}
+              <Link 
+                to="/documents"
                 className="font-bold text-[#006BB6] hover:underline"
               >
                 Ver todos →
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -1058,12 +1039,12 @@ export default function App() {
                   ></button>
                 ))}
               </div>
-              <button 
-                onClick={() => setCurrentPage('gallery')}
+              <Link 
+                to="/gallery"
                 className="font-bold text-[#006BB6] hover:underline"
               >
                 Ver galería →
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -1342,189 +1323,98 @@ export default function App() {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div 
-            className="flex cursor-pointer items-center gap-2"
-            onClick={() => {
-              setCurrentPage('home');
-              setSelectedArticle(null);
-            }}
-          >
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
-              <img 
-                src="/assets/logo.png" 
-                alt="Logo" 
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-xs font-bold tracking-tighter text-[#E31E24]">COOPERACIÓN</span>
-              <span className="text-sm font-black tracking-tighter text-[#006BB6]">POPULAR</span>
-            </div>
-          </div>
-
-          {/* Desktop Nav */}
-          <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={() => {
-                  setCurrentPage(link.id);
-                  if (link.id === 'news' || link.id === 'home') setSelectedArticle(null);
-                }}
-                className={`group flex items-center gap-1 text-sm font-medium transition-colors hover:text-[#006BB6] ${
-                  currentPage === link.id && link.id !== 'home' ? 'text-[#006BB6]' : 'text-slate-600'
-                }`}
-              >
-                {link.name}
-                {link.hasDropdown && (
-                  <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Toggle */}
-          <button 
-            className="rounded-md p-2 text-slate-600 md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X /> : <Menu />}
-          </button>
-        </div>
-
-        {/* Mobile Nav */}
-        {isMenuOpen && (
-          <motion.nav 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border-t border-slate-100 bg-white px-4 py-4 md:hidden"
-          >
-            <div className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <button
-                  key={link.name}
-                  className="flex items-center justify-between text-base font-medium text-slate-600"
-                  onClick={() => {
-                    setCurrentPage(link.id);
-                    if (link.id === 'news' || link.id === 'home') setSelectedArticle(null);
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  {link.name}
-                  {link.hasDropdown && <ChevronDown className="h-4 w-4" />}
-                </button>
-              ))}
-            </div>
-          </motion.nav>
-        )}
-      </header>
-
-      <main>
-        {currentPage === 'home' && renderHome()}
-        {currentPage === 'about' && renderAbout()}
-        {currentPage === 'news' && renderNews()}
-        {currentPage === 'gallery' && renderGallery()}
-        {currentPage === 'documents' && renderDocuments()}
-        {currentPage === 'admin' && isAdminLoggedIn && renderAdmin()}
-      </main>
-
-      <AnimatePresence>
-        {showLogin && renderLogin()}
-      </AnimatePresence>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-[#F8F8F8] pt-12 pb-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-3 text-left">
-            {/* Información Básica */}
-            <div>
-              <h3 className="mb-4 text-xl font-bold text-slate-900">Información Básica</h3>
-              <p className="mb-4 text-sm leading-relaxed text-slate-600">
-                Los siguientes enlaces informan a más detalle los principios en los que se basa nuestra organización política.
-              </p>
-              <ul className="space-y-1">
-                <li>
-                  <button onClick={() => setCurrentPage('about')} className="text-sm text-slate-900 underline hover:text-[#006BB6]">Nosotros</button>
-                </li>
-                <li>
-                  <button onClick={() => setCurrentPage('news')} className="text-sm text-slate-900 underline hover:text-[#006BB6]">Noticias</button>
-                </li>
-                <li>
-                  <button onClick={() => setCurrentPage('documents')} className="text-sm text-slate-900 underline hover:text-[#006BB6]">Documentos</button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Social */}
-            <div>
-              <h3 className="mb-4 text-xl font-bold text-slate-900">Social</h3>
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877F2] text-white font-bold text-lg">f</div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1DA1F2] text-white">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
-                </div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-200 text-red-500 font-bold text-lg">G</div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF0000] text-white">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                </div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-[#FFDC80] via-[#E1306C] to-[#833AB4] text-white">
-                   <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.332 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.332-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-2.242 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Enlaces de Interés */}
-            <div>
-              <h3 className="mb-4 text-xl font-bold text-slate-900">Enlaces de Interés</h3>
-              <div className="flex flex-wrap gap-4">
-                <a 
-                  href="https://portal.jne.gob.pe/portal" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex h-16 w-24 items-center justify-center rounded-lg bg-white p-2 shadow-md border border-slate-200 transition-all hover:shadow-xl hover:-translate-y-1"
-                >
-                  <img src="https://yt3.googleusercontent.com/H3xIn0kfn2oCSO-7s6nADhCaUncPuQ8dUAvhqxvAtWQycHTmpVF7sXe7uAchAxj7zMGqngqVvJQ=s900-c-k-c0x00ffffff-no-rj" alt="JNE" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
-                </a>
-                <a 
-                  href="https://www.gob.pe/onpe" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex h-16 w-24 items-center justify-center rounded-lg bg-white p-2 shadow-md border border-slate-200 transition-all hover:shadow-xl hover:-translate-y-1"
-                >
-                  <img src="https://diariocorreo.pe/resizer/sEx9AeYwmjmYqpBt9JTX5tKqPhw=/1200x900/smart/filters:format(jpeg):quality(75)/arc-anglerfish-arc2-prod-elcomercio.s3.amazonaws.com/public/QEP5A6ZQSZASPJCGZ7HDPDRABQ.jpg" alt="ONPE" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
-                </a>
-                <a 
-                  href="https://www.gob.pe/reniec" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex h-16 w-24 items-center justify-center rounded-lg bg-white p-2 shadow-md border border-slate-200 transition-all hover:shadow-xl hover:-translate-y-1"
-                >
-                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDtsqysrc4fIinkMWj970loI8ESK8sjFsiRG0TUqAjILFxBabe" alt="RENIEC" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-slate-200 pt-8 text-center">
-            <p className="text-sm text-slate-500">
-              © 2024 Organización política. Todos los derechos reservados.
-            </p>
-            {!isAdminLoggedIn && (
-              <button 
-                onClick={() => setShowLogin(true)}
-                className="mt-4 text-xs text-slate-400 hover:text-slate-600"
-              >
-                Acceso Administrativo
-              </button>
-            )}
-          </div>
-        </div>
-      </footer>
+  const NotFound = () => (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
+      <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="mb-8 rounded-full bg-slate-100 p-8 text-slate-400">
+        <AlertCircle className="h-20 w-20" />
+      </motion.div>
+      <h1 className="text-8xl font-black tracking-tighter text-[#006BB6]">404</h1>
+      <h2 className="mt-4 text-3xl font-bold text-slate-800">Página no encontrada</h2>
+      <p className="mt-6 max-w-md text-slate-500">Lo sentimos, la página que buscas no existe.</p>
+      <Link to="/" className="mt-10 rounded-full bg-[#006BB6] px-10 py-4 font-bold text-white shadow-xl hover:bg-[#005a99]">
+        Regresar al Inicio
+      </Link>
     </div>
+  );
+
+  const Layout = ({ children }: { children: React.ReactNode }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    return (
+      <div className="min-h-screen bg-white font-['Outfit',sans-serif]">
+        <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-20 items-center justify-between">
+              <Link to="/" className="flex items-center gap-3">
+                <div className="h-10 w-10 overflow-hidden"><img src="/assets/logo.png" alt="Logo" className="h-full w-full object-contain" /></div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-xl font-black tracking-tighter text-[#006BB6]">COOPERACIÓN</span>
+                  <span className="text-xl font-black tracking-tighter text-[#006BB6]">POPULAR</span>
+                </div>
+              </Link>
+              <nav className="hidden items-center gap-1 md:flex">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative rounded-full px-5 py-2 text-sm font-bold transition-all ${location.pathname === link.path ? 'text-[#006BB6]' : 'text-slate-600 hover:text-[#006BB6]'}`}
+                  >
+                    {link.name}
+                    {location.pathname === link.path && (
+                      <motion.div layoutId="navUnderline" className="absolute bottom-0 left-5 right-5 h-0.5 bg-[#006BB6]" />
+                    )}
+                  </Link>
+                ))}
+                {isAdminLoggedIn && (
+                  <button onClick={handleLogout} className="ml-4 flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-100">
+                    <LogOut className="h-4 w-4" /> Salir
+                  </button>
+                )}
+              </nav>
+              <button className="md:hidden text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.nav initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0 }} className="border-t border-slate-100 bg-white md:hidden p-4">
+                <div className="flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <Link key={link.path} to={link.path} onClick={() => setIsMenuOpen(false)} className={`block p-4 font-bold rounded-lg ${location.pathname === link.path ? 'bg-slate-50 text-[#006BB6]' : 'text-slate-600 hover:bg-slate-50'}`}>{link.name}</Link>
+                  ))}
+                </div>
+              </motion.nav>
+            )}
+          </AnimatePresence>
+        </header>
+        <main>{children}</main>
+        <footer className="border-t border-slate-200 bg-[#F8F8F8] pt-16 pb-12">
+           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+             © 2024 Cooperación Popular. Todos los derechos reservados.
+           </div>
+        </footer>
+      </div>
+    );
+  };
+
+  const AdminRoute = () => {
+    if (!isAdminLoggedIn) return <Layout>{renderLogin()}</Layout>;
+    return <Layout>{renderAdmin()}</Layout>;
+  };
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout>{renderHome()}</Layout>} />
+        <Route path="/about" element={<Layout>{renderAbout()}</Layout>} />
+        <Route path="/news" element={<Layout>{renderNews()}</Layout>} />
+        <Route path="/gallery" element={<Layout>{renderGallery()}</Layout>} />
+        <Route path="/documents" element={<Layout>{renderDocuments()}</Layout>} />
+        <Route path="/admin" element={<AdminRoute />} />
+        <Route path="*" element={<Layout><NotFound /></Layout>} />
+      </Routes>
+    </BrowserRouter>
   );
 }
