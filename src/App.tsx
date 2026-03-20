@@ -102,8 +102,8 @@ const Layout = ({ children, isAdminLoggedIn, handleLogout, isMenuOpen, setIsMenu
             <Link to="/" className="flex items-center gap-3">
               <div className="h-10 w-10 overflow-hidden"><img src="/assets/logo.png" alt="Logo" className="h-full w-full object-contain" /></div>
               <div className="flex flex-col leading-none">
-                <span className="text-xl font-black tracking-tighter text-[#006BB6]">COOPERACIÓN</span>
-                <span className="text-xl font-black tracking-tighter text-[#006BB6]">POPULAR</span>
+                <span className="text-sm font-black tracking-tighter text-[#006BB6]">COOPERACIÓN, VERDAD Y HONRADEZ</span>
+                <span className="text-xs font-bold text-red-500">Alianza Electoral</span>
               </div>
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
@@ -153,12 +153,12 @@ const Layout = ({ children, isAdminLoggedIn, handleLogout, isMenuOpen, setIsMenu
                   <img src="/assets/logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="text-lg font-black tracking-tighter text-white">COOPERACIÓN</span>
-                  <span className="text-lg font-black tracking-tighter text-[#FFD700]">POPULAR</span>
+                  <span className="text-sm font-black tracking-tighter text-[#FFD700]">COOPERACIÓN, VERDAD Y HONRADEZ</span>
+                  <span className="text-xs font-bold text-white/60">Alianza Electoral</span>
                 </div>
               </div>
               <p className="text-sm leading-relaxed text-white/70">
-                Partido político peruano comprometido con el desarrollo y bienestar de todos los ciudadanos del Perú.
+                Alianza electoral peruana comprometida con el desarrollo y bienestar de todos los ciudadanos del Perú bajo los principios de cooperación, verdad y honradez.
               </p>
               {/* Redes sociales */}
               <div className="flex gap-3 mt-2">
@@ -224,7 +224,7 @@ const Layout = ({ children, isAdminLoggedIn, handleLogout, isMenuOpen, setIsMenu
           {/* Línea divisoria y copyright */}
           <div className="mt-12 border-t border-white/10 pt-8 text-center">
             <p className="text-sm text-white/50">
-              © {new Date().getFullYear()} Cooperación Popular. Todos los derechos reservados.
+              © {new Date().getFullYear()} Alianza Electoral “COOPERACIÓN, VERDAD Y HONRADEZ”. Todos los derechos reservados.
             </p>
           </div>
         </div>
@@ -322,7 +322,7 @@ export default function App() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentHeroSlide((prev) => (prev + 1) % 3);
-    }, 8000);
+    }, 4000);
     return () => clearInterval(timer);
   }, []);
 
@@ -1112,11 +1112,11 @@ export default function App() {
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="flex flex-col items-center px-4 text-center"
               >
-                <h2 className="max-w-4xl text-5xl font-black tracking-tighter text-[#006BB6] sm:text-7xl md:text-9xl">
-                  JUSTICIA Y <span className="text-[#E31E24]">IGUALDAD</span>
+                <h2 className="max-w-4xl text-5xl font-black tracking-tighter text-[#006BB6] sm:text-7xl md:text-9xl text-center">
+                  VERDAD Y <span className="text-[#E31E24]">HONRADEZ</span>
                 </h2>
-                <p className="mt-6 text-xl font-bold uppercase tracking-[0.2em] text-slate-400 md:text-3xl">
-                  Unidos por un futuro transparente
+                <p className="mt-6 text-xl font-bold uppercase tracking-[0.2em] text-slate-400 md:text-3xl text-center">
+                  ALIANZA ELECTORAL
                 </p>
               </motion.div>
             )}
@@ -1510,14 +1510,14 @@ export default function App() {
             <div className="text-center">
               <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl md:text-4xl">¿Quiénes Somos?</h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600 sm:mt-6 sm:text-lg">
-                Somos un grupo de ciudadanos comprometidos con el desarrollo y el bienestar de nuestra comunidad. Nuestro partido está basado en los principios de justicia, igualdad y transparencia.
+                Somos un grupo de ciudadanos comprometidos con el desarrollo y el bienestar de nuestra comunidad. Nuestra alianza está basada en los principios de cooperación, verdad y honradez.
               </p>
             </div>
             
             <div className="mt-10 text-center sm:mt-12">
               <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">Nuestra Historia</h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:mt-6 sm:text-base">
-                El partido político Cooperación Popular, nace con el propósito de generar espacios para que la ciudadanía pueda proponer, participar y fiscalizar las acciones del Estado ante la resolución de los principales problemas del país.
+                La Alianza Electoral “COOPERACIÓN, VERDAD Y HONRADEZ”, nace con el propósito de generar espacios para que la ciudadanía pueda proponer, participar y fiscalizar las acciones del Estado ante la resolución de los principales problemas del país.
               </p>
             </div>
           </div>
@@ -1527,7 +1527,7 @@ export default function App() {
             <div className="text-center">
               <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">Nuestra Misión</h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:mt-6 sm:text-base">
-                El partido político Cooperación Popular, busca forjar una comunidad basada en la justicia, la honradez y el desarrollo, que honre los derechos humanos y las libertades fundamentales. Asimismo, rechazamos enérgicamente la corrupción dado que perjudica al desarrollo de los pueblos del Perú, por ello, promovemos la participación de los ciudadanos como mecanismo de control y como contribución ciudadana a la resolución de los problemas del país.
+                La Alianza Electoral “COOPERACIÓN, VERDAD Y HONRADEZ”, busca forjar una comunidad basada en la cooperación, la verdad y la honradez, que honre los derechos humanos y las libertades fundamentales. Asimismo, rechazamos enérgicamente la corrupción dado que perjudica al desarrollo de los pueblos del Perú, por ello, promovemos la participación de los ciudadanos como mecanismo de control y como contribución ciudadana a la resolución de los problemas del país.
               </p>
             </div>
 

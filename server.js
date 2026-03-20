@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = 5000;
 const db = new Database('database.db');
-const SECRET_KEY = 'cooperacion-popular-secret-key-2025';
+const SECRET_KEY = 'alianza-cooperacion-verdad-honradez-2025';
 
 // Middlewares
 app.use(cors()); // Allow all origins for easier debugging
